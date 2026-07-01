@@ -18,7 +18,11 @@ if uploaded_file:
         collection = store_in_chromadb(chunks)
         return collection
 
-    collection = setup_pipeline(uploaded_file.name)
+    try:
+        collection = setup_pipeline(uploaded_file.name)
+    except Exception as e:
+        st.error(f"Failed to process PDF: {str(e)}")
+        st.stop()
 
     question = st.text_input("Ask a question about your PDF:")
 

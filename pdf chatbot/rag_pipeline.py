@@ -64,22 +64,25 @@ def query_collection(collection, question, n_results=3):
 
 # Step 6: Ask Gemini using retrieved chunks
 def ask_gemini(question, relevant_chunks):
-    labeled_chunks = [f"[Chunk {i+1}: {chunk}]" for i,chunk in enumerate(relevant_chunks) ]
-    context= "\n\n".join(labeled_chunks)
+    try:
+        labeled_chunks = [f"[Chunk {i+1}: {chunk}]" for i,chunk in enumerate(relevant_chunks) ]
+        context= "\n\n".join(labeled_chunks)
 
-    prompt= f"""Answer the question using ONLY the context below.
-            Cite which chunk number(s) you used, like [Chunk 1].
-            If the answer is not in the context, say "I don't know based on the document."
+        prompt= f"""Answer the question using ONLY the context below.
+                Cite which chunk number(s) you used, like [Chunk 1].
+                If the answer is not in the context, say "I don't know based on the document."
+    
+                Context: {context}
+    
+                Question: {question}
+    
+                Answer:"""
 
-            Context: {context}
-
-            Question: {question}
-
-            Answer:"""
-
-    model= genai.GenerativeModel('gemini-2.5-flash')
-    response= model.generate_content(prompt)
-    return response.text
+        model= genai.GenerativeModel('gemini-2.5-flash')
+        response= model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        return f"Error getting answer: {str(e)}"
 
 # Main pipeline
 if __name__ == "__main__":
