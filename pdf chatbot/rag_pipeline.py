@@ -18,18 +18,18 @@ def load_pdf(path):
     return text
 
 # Step 2: Chunk the text
-def chunk_text(text, chunk_size=500, overlap=50):
+def chunk_text(text, chunk_size=500):
     sentences = re.split(r'(?<=[.!?])\s+', text)
     chunks=[]
     current_chunk = ""
 
     for sentence in sentences:
-        if len(current_chunk) + len(sentences) <= chunk_size:
+        if len(current_chunk) + len(sentence) <= chunk_size:
             current_chunk += sentence + " "
         else:
             if current_chunk:
                 chunks.append(current_chunk.strip())
-            current_chunk += sentence + " "
+            current_chunk = sentence + " "
 
     if current_chunk:
         chunks.append(current_chunk.strip())
@@ -37,12 +37,18 @@ def chunk_text(text, chunk_size=500, overlap=50):
     return chunks
 
 # Step 3 & 4: Embed chunks and store in ChromaDB
-def store_in_chromadb(chunks):
+def store_in_chromadb(chunks, collection_name="pdf_chunks"):
     model = SentenceTransformer('all-MiniLM-L6-v2')
     embeddings = model.encode(chunks).tolist()
 
     client = chromadb.Client()
-    collection = client.create_collection("pdf_chunks")
+
+    try:
+        client.delete_collection(collection_name)
+    except Exception:
+        pass
+
+    collection = client.get_or_create_collection(collection_name)
 
     collection.add(
         documents=chunks,
