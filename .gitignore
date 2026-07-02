@@ -3,3 +3,4 @@
 .idea/
 __pycache__/
 *.pyc
+pdf chatbot/tiny-shakespeare.pdf
